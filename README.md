@@ -9,6 +9,8 @@ docker run drone-line-hazel
 docker push tinazx056/drone-line-notify
 ```
 
+若要在台灣時間的週六、週日略過推播，可在 `.drone.yml` 的 `settings` 加上 `skip_weekend: true`。Drone 會將它傳為 `PLUGIN_SKIP_WEEKEND="true"`；未設定或設為其他值時照常推播。判斷一律以台灣時間（UTC+8）為準。
+
 ## drone.yml
 Drone Setting Environment
 - line_access_token

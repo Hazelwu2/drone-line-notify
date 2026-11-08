@@ -1,9 +1,15 @@
 (async function () {
+  const { shouldSkip } = require('./weekend')
+  const now = new Date()
+  if (shouldSkip({ skipWeekend: process.env.PLUGIN_SKIP_WEEKEND, now })) {
+    const taiwanDay = new Date(now.getTime() + 8 * 60 * 60 * 1000).getUTCDay()
+    console.log(`台灣時間${taiwanDay === 6 ? '週六' : '週日'}，skip_weekend 已開啟，不推播`)
+    return
+  }
+
   const axios = require('axios')
   // const dayjs = require('dayjs')
   const flex = require('./flex.json')
-
-  console.log(process.env)
 
   const {
       DRONE_REPO_NAME,
@@ -45,5 +51,15 @@
               'Authorization': `Bearer ${PLUGIN_ACCESS_TOKEN}`
           }
       }
-  ).catch(err => console.log(err))
+  ).catch(err => {
+    const response = err.response
+    const details = response
+      ? [response.status, response.data && response.data.message].filter(value => value !== undefined && value !== null && value !== '').join(' ')
+      : err.message
+    const oneLineDetails = String(details).replace(/[\r\n]+/g, ' ')
+    const safeDetails = PLUGIN_ACCESS_TOKEN
+      ? oneLineDetails.split(PLUGIN_ACCESS_TOKEN).join('[REDACTED]')
+      : oneLineDetails
+    console.log(`LINE 推播失敗：${safeDetails}`)
+  })
 })()
